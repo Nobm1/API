@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Patente y Valores</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            font-family: "Arial", sans-serif;
+        }
+        .left {
+            text-align: left;
+        }
+        .patente {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .driver {
+            font-size: 16px;
+        }
+        .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .boxes-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+        .boxes {
+            display: flex;
+            gap: 20px;
+        }
+        .box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 2px solid;
+            border-radius: 5px;
+            background-color: #fff;
+            width: 100px; /* Ensures all boxes have the same width */
+            font-family: "Arial", sans-serif;
+        }
+        .total {
+            border-color: #4a4a4a;
+            background-color: #d3d3d3;
+        }
+        .entregados {
+            border-color: #006400;
+            background-color: #90ee90;
+        }
+        .no-entregados {
+            border-color: #8b0000;
+            background-color: #f08080;
+        }
+        .pendientes {
+            border-color: #ffd700;
+            background-color: #ffffe0;
+        }
+        .box .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .box .label {
+            font-size: 12px;
+        }
+        .progress-bar-container {
+            flex-grow: 3; /* Allows the progress bar to take even more space */
+            margin-left: 20px;
+        }
+        .progress-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .progress-bar {
+            height: 20px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #4caf50;
+            width: 58.82%; /* Adjust the width based on the percentage calculated */
+            border-radius: 10px 0 0 10px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+		.status-icon {
+            font-size: 24px;
+        }
+        .status-text {
+            font-size: 12px;
+            text-align: center;
+        }
+		
+        #container {
+            width: 95%;
+            background: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        #titleBar {
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: "Arial", sans-serif;
+        }
+        #titleBar .left {
+            text-align: left;
+        }
+        #titleBar .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #titleBar .patente {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #titleBar .driver {
+            font-size: 16px;
+        }
+		
+		#bottomPanel {
+            width: 100%;
+            margin-top: 20px;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px; /* Bordes redondeados */
+            overflow: hidden;
+            transition: height 0.5s ease; /* Para suavizar la transición al abrir y cerrar */
+        }
+        #bottomPanel table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px; /* Tamaño de letra más pequeño para la tabla */
+            margin: 10px; /* Margen interno para separar la tabla del borde */
+			font-family: "Arial", sans-serif;
+        }
+        #bottomPanel th, #bottomPanel td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        #bottomPanel th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        #bottomPanel tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        #bottomPanel tbody tr:hover {
+            background-color: #ddd;
+        }
+        #bottomPanel td.warning {
+            color: red;
+        }
+		
+		#content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+		#infoPanel {
+            width: 25%;
+            padding: 20px;
+            background: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 100%; /* Ajuste para que cubra el 100% de la altura */
+			font-family: "Arial", sans-serif;
+        }
+        #chartContainer {
+            width: 70%;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="titleBar">
+            <div class="left">
+                <div class="patente">AAAA01</div>
+                <div class="driver">Juan Pérez</div>
+            </div>
+            <div class="right">
+                <div class="boxes-container">
+                    <div class="boxes">
+                        <div class="box total">
+                            <div class="value">34</div>
+                            <div class="label">Total</div>
+                        </div>
+                        <div class="box entregados">
+                            <div class="value">20</div>
+                            <div class="label">Entregados</div>
+                        </div>
+                        <div class="box no-entregados">
+                            <div class="value">0</div>
+                            <div class="label">No Entregados</div>
+                        </div>
+                        <div class="box pendientes">
+                            <div class="value">14</div>
+                            <div class="label">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-title">Nivel Servicio Entregas</div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 50.82%;">50.82%</div>
+                    </div>
+                </div>
+				<div class="status">
+					<span class="status-icon"><i class="fas fa-truck"></i></span>
+					<span class="status-text">Abierta</span>
+				</div>
+            </div>
+        </div>
+        <div id="content">
+            <div id="infoPanel">
+                <h2>Información de la Ruta</h2>
+                <p><strong>Patente:</strong> ABC123</p>
+                <p><strong>Nombre Driver:</strong> Juan Pérez</p>
+                <p><strong>Cantidad de productos total:</strong> <span id="totalProducts">21</span></p>
+                <p><strong>Cantidad de productos entregados:</strong> <span id="deliveredProducts">20</span></p>
+                <p><strong>Cantidad de productos no entregados:</strong> <span id="notDeliveredProducts">1</span></p>
+            </div>
+            <div id="chartContainer">
+                <canvas id="entregasChart" width="300" height="100"></canvas>
+            </div>
+		</div>
+			
+			<div id="bottomPanel" class="open">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Fecha de Entrega</th>
+                        <th>Descripción del Producto</th>
+                        <th>Comuna</th>
+                        <th>Estado del Producto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1387094002</td>
+                        <td>2024-05-22</td>
+                        <td>Producto 1</td>
+                        <td>Santiago</td>
+                        <td>Entregado</td>
+                    </tr>
+                    <tr>
+                        <td>2909892461</td>
+                        <td>2024-05-21</td>
+                        <td>Producto 2</td>
+                        <td>Maipú</td>
+                        <td class="warning">Pendiente</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+		
+      </div>
+
+    <script>
+        // Datos de ejemplo
+        const horas = ["10:04", "10:18", "10:31", "10:48", "11:02", "11:18", "11:48", "12:00", "12:07", "12:11", "12:22", "12:27", "12:35", "12:43", "12:52", "13:03", "13:23", "13:24", "13:41", "14:04", "14:12"];
+        const estados = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1];
+        const codigos = ["1387094002", "2909892461", "2909866568", "2909822612", "2909893764", "2909879808", "2909890433", "2909892591", "2909897574", "2909889899", "2909897617", "2909898329", "2909875996", "2909894715", "819727", "2909879261", "2909900019", "385161235", "819783", "1386860601", "819770"];
+
+        // Convertir horas a formato de 24 horas en números
+        const horasNum = horas.map(hora => {
+            const [hh, mm] = hora.split(':').map(Number);
+            return hh + mm / 60;
+        });
+
+        // Obtener la hora actual en formato de 24 horas
+        const now = new Date();
+        const currentHour = now.getHours() + now.getMinutes() / 60;
+
+        // Configurar los datos para Chart.js
+        const data = {
+            labels: horas,
+            datasets: [{
+                label: 'Estado de Entrega',
+                data: horasNum.map((hora, index) => ({ x: hora, y: estados[index], position: index + 1, codigo: codigos[index] })),
+                backgroundColor: estados.map(estado => estado === 1 ? 'green' : 'red'),
+                borderColor: estados.map(estado => estado === 1 ? 'green' : 'red'),
+                pointRadius: 8, // Tamaño de los puntos
+                pointBorderWidth: 0, // Grosor del borde del punto
+                showLine: true, // Mostrar líneas
+                borderColor: 'grey', // Color de la línea
+                borderWidth: 1, // Grosor de la línea
+                tension: 0, // Líneas rectas
+            }]
+        };
+
+        // Configurar el gráfico
+        const config = {
+            type: 'scatter',
+            data: data,
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: {
+                            callback: function(value) {
+                                const hour = Math.floor(value);
+                                const minutes = (value - hour) * 60;
+                                return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                            },
+                            stepSize: 1,
+                            min: 8,
+                            max: 24
+                        },
+                        grid: {
+                            drawOnChartArea: false, // No mostrar las líneas verticales de la cuadrícula
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                if (value === 1) return 'Entregado';
+                                if (value === 0) return 'No Entregado';
+                                return '';
+                            },
+                            stepSize: 1
+                        },
+                        min: -0.5,
+                        max: 1.5,
+                        grid: {
+                            drawOnChartArea: true, // No mostrar las líneas horizontales de la cuadrícula
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: currentHour,
+                                xMax: currentHour,
+                                borderColor: 'yellow',
+                                borderWidth: 2,
+                                label: {
+                                    enabled: true,
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const estado = context.raw.y === 1 ? 'Entregado' : 'No Entregado';
+                                return `Posición: ${context.raw.position}, Código: ${context.raw.codigo}`;
+                            }
+                        }
+                    }
+                },
+                onClick: (e, elements) => {
+                    if (elements.length) {
+                        const index = elements[0].index;
+                        const codigo = data.datasets[0].data[index].codigo;
+                        navigator.clipboard.writeText(codigo).then(() => {
+                            alert(`Código ${codigo} copiado al portapapeles`);
+                        });
+                    }
+                }
+            }
+        };
+
+        // Renderizar el gráfico
+        new Chart(
+            document.getElementById('entregasChart'),
+            config
+        );
+    </script>
+</body>
+</html>

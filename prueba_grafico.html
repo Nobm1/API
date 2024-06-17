@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entregas y No Entregas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Entregas y No Entregas a lo Largo del Día</h2>
+    <canvas id="entregasChart" width="300" height="100"></canvas>
+
+    <script>
+        // Datos de ejemplo
+        const horas = ["09:39","09:56","10:17","10:33","11:08","11:43","12:19","12:40","12:55","13:32","13:33","14:12","14:38","15:03","15:29","16:15","16:47","22:00"];
+        const estados = [1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1];
+
+        // Convertir horas a formato de 24 horas en números
+        const horasNum = horas.map(hora => {
+            const [hh, mm] = hora.split(':').map(Number);
+            return hh + mm / 60;
+        });
+
+        // Configurar los datos para Chart.js
+        const data = {
+            labels: horas,
+            datasets: [{
+                label: 'Estado de Entrega',
+                data: horasNum.map((hora, index) => ({ x: hora, y: estados[index], position: index + 1 })),
+                backgroundColor: estados.map(estado => estado === 1 ? 'green' : 'red'),
+                borderColor: estados.map(estado => estado === 1 ? 'green' : 'red'),
+                pointRadius: 8, // Tamaño de los puntos
+                pointBorderWidth: 0, // Grosor del borde del punto
+                showLine: true, // Mostrar líneas
+                borderColor: 'grey', // Color de la línea
+                borderWidth: 1, // Grosor de la línea
+                tension: 0, // Líneas rectas
+            }]
+        };
+
+        // Configurar el gráfico
+        const config = {
+            type: 'scatter',
+            data: data,
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Hora del Día'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                const hour = Math.floor(value);
+                                const minutes = (value - hour) * 60;
+                                return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                            },
+                            stepSize: 1,
+                            min: 8,
+                            max: 24
+                        },
+                        grid: {
+                            drawOnChartArea: false, // No mostrar las líneas verticales de la cuadrícula
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Estado de Entrega'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (value === 1) return 'Entregado';
+                                if (value === 0) return 'No Entregado';
+                                return '';
+                            },
+                            stepSize: 1
+                        },
+                        min: -0.5,
+                        max: 1.5,
+                        grid: {
+                            drawOnChartArea: true, // No mostrar las líneas horizontales de la cuadrícula
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const index = context.dataIndex + 1;
+                                const estado = context.raw.y === 1 ? 'Entregado' : 'No Entregado';
+                                return `Posición: ${index}, Estado: ${estado}`;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Renderizar el gráfico
+        new Chart(
+            document.getElementById('entregasChart'),
+            config
+        );
+    </script>
+</body>
+</html>
