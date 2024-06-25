@@ -42,6 +42,10 @@ class agregarPatente(BaseModel):
     id_operacion : int
     id_centro_op : int
     estado : int
+    
+class updateApp(BaseModel):
+    id: int
+    estado: bool
 
 def ejecutar_consulta(sql):
     try:
@@ -128,15 +132,26 @@ async def Obtener_datos(fecha: str, id : int):
         raise HTTPException(status_code=404, detail="No se encontraron datos")
      
 
-
+def ejecutar_delete(sql):
+    try:
+        # Conexión a la base de datos PostgreSQL
+        conexion = psycopg2.connect(**parametros_conexion)
+        cursor = conexion.cursor()
+        # Ejecutar la sentencia SQL de eliminación
+        cursor.execute(sql)
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
 @app.delete("/api/borrar")
-async def eliminar_modalidad(ppu: str):
+async def eliminar_modalidad(id_ppu: str):
     # Construir la sentencia SQL de eliminación
-    sql = f"DELETE FROM transporte.vehiculo WHERE ppu='{ppu}';"
+    sql = f"DELETE FROM mercadolibre.citacion WHERE id_ppu ='{id_ppu}';"
     # Llamar a la función para ejecutar la sentencia SQL de eliminación
-    ejecutar_consulta(sql)
-    return {"message": f"Entrada con ID {ppu} eliminada correctamente"}
+    ejecutar_delete(sql)
+    return {"message": f"Entrada con ID {id_ppu} eliminada correctamente"}
 
 
 @app.get("/api/estadoList")
@@ -236,6 +251,19 @@ async def agregarPatente(body: agregarPatente):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("api/actualizar_estadoPpu")
+async def actualizar_estado(estado: int, id : int):
+    try:
+        conexion = psycopg2.connect(**parametros_conexion)
+        cursor = conexion.cursor()
+        consulta = f"UPDATE mercadolibre.citacion SET estado={estado} WHERE id_ppu={id}"
+        cursor.execute(consulta)
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        print()
+        return {"message": "Datos Ingresados Correctamente"}
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
  uvicorn.run(app, host="0.0.0.0", port=8000)
