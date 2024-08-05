@@ -521,5 +521,23 @@ async def Obtener_datos( id_ppu: int, fecha: str):
     else:
         raise HTTPException(status_code=404, detail="No se encontraron datos")
 
+
+@app.post("/api/BitacoraGeneral")
+
+async def actualizar_estado(id_usuario: int, ids_usuario:str, modificación: str, latitud : int, longitud: str, origen):
+    try:
+        conexion = psycopg2.connect(**parametros_conexion)
+        cursor = conexion.cursor()
+        consulta = f"INSERT INTO mercadolibre.bitacora_general(id_usuario,ids_usuario, modificacion, latitud, longitud, origen)VALUES('1195', 'hela-1195', 'test', '23.3423', '34.4444', 'NO SE QUE ES');"
+        cursor.execute(consulta)
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        print()
+        return {"message": "Datos Ingresados Correctamente"}
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+
+
 if __name__ == "__main__":
  uvicorn.run(app, host="0.0.0.0", port=8000)
