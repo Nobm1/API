@@ -524,11 +524,11 @@ async def Obtener_datos( id_ppu: int, fecha: str):
 
 @app.post("/api/BitacoraGeneral")
 
-async def actualizar_estado(id_usuario: int, ids_usuario:str, modificación: str, latitud : int, longitud: str, origen):
+async def actualizar_estado(id_usuario: int, ids_usuario:str, modificacion: str, latitud : float , longitud: float, origen:str):
     try:
         conexion = psycopg2.connect(**parametros_conexion)
         cursor = conexion.cursor()
-        consulta = f"INSERT INTO mercadolibre.bitacora_general(id_usuario,ids_usuario, modificacion, latitud, longitud, origen)VALUES('1195', 'hela-1195', 'test', '23.3423', '34.4444', 'NO SE QUE ES');"
+        consulta = f"INSERT INTO mercadolibre.bitacora_general(id_usuario,ids_usuario, modificacion, latitud, longitud, origen)VALUES('{id_usuario}', '{ids_usuario}', '{modificacion}', '{latitud}', '{longitud}', '{origen}');"
         cursor.execute(consulta)
         conexion.commit()
         cursor.close()
