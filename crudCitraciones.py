@@ -232,11 +232,13 @@ async def Obtener_datos(fecha: str, op : int, cop : int):
                                 "id_ppu": fila [0],
                                 "ppu": fila[1],
                                 "ruta_meli": fila[2],
-                                "estado": fila [3],
-                                "id_driver":fila[4],
-                                "nombre_driver": fila[5],
-                                "id_peoneta": fila [6],
-                                "nombre_peoneta":fila[7]
+                                "tipo_ruta":fila[3],
+                                "estado": fila [4],
+                                "id_driver":fila[5],
+                                "nombre_driver": fila[6],
+                                "id_peoneta": fila [7],
+                                "nombre_peoneta":fila[8]
+
 
                             } 
                             for fila in datos]
@@ -459,11 +461,31 @@ async def Obtener_datos(fecha:str, id_cop:int, estado: int):
 
 @app.post("/api/Ambulancia")
 
-async def actualizar_estado(id_ppu_amb: int, ruta_meli_amb:int, ruta_amb_interna:int, id_ppu : int, fecha: str):
+
+
+@app.get("/api/AmbulanceCode")
+async def Obtener_datos():
+     # Consulta SQL para obtener datos (por ejemplo)
+    consulta = f"select * from mercadolibre.genera_codigo_ambulancia();"
+    # Ejecutar la consulta utilizando nuestra función
+    datos = ejecutar_consulta(consulta)
+    # Verificar si hay datos 
+    if datos:
+        datos_formateados = [{
+                                "genera_codigo_ambulancia": fila[0],
+                            } 
+                            for fila in datos]
+        return datos_formateados
+    else:
+        raise HTTPException(status_code=404, detail="No se encontraron datos")
+    
+@app.post("/api/SaveData")
+
+async def actualizar_estado(ruta_amb_interna: str, id_ppu: int, fecha: str, id_ppu_amb: int, ruta_meli_amb:str):
     try:
         conexion = psycopg2.connect(**parametros_conexion)
         cursor = conexion.cursor()
-        consulta = f"UPDATE mercadolibre.citacion SET id_ppu_amb = {id_ppu_amb},ruta_meli_amb =  {ruta_meli_amb}, ruta_amb_interna = {ruta_amb_interna} WHERE id_ppu={id_ppu} and fecha='{fecha}'"
+        consulta = f"UPDATE mercadolibre.citacion SET ruta_amb_interna = '{ruta_amb_interna}', id_ppu_amb = {id_ppu_amb}, ruta_meli_amb = '{ruta_meli_amb}' where id_ppu = {id_ppu} and fecha ='{fecha}'"
         cursor.execute(consulta)
         conexion.commit()
         cursor.close()
@@ -471,6 +493,58 @@ async def actualizar_estado(id_ppu_amb: int, ruta_meli_amb:int, ruta_amb_interna
         print()
         return {"message": "Datos Ingresados Correctamente"}
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/getEstados")
+async def Obtener_datos( id_ppu: int, fecha: str):
+     # Consulta SQL para obtener datos (por ejemplo)
+    consulta = f"select tipo_ruta from mercadolibre.citacion c where fecha ='{fecha}' and id_ppu ='{id_ppu}'"
+    # Ejecutar la consulta utilizando nuestra función
+    datos = ejecutar_consulta(consulta)
+    # Verificar si hay datos 
+    if datos:
+        datos_formateados = [{
+                                "tipo_ruta": fila [0],
+
+                            } 
+                            for fila in datos]
+        return datos_formateados
+    else:
+        raise HTTPException(status_code=404, detail="No se encontraron datos")
+
+
+@app.post("/api/BitacoraGeneral")
+
+async def actualizar_estado(id_usuario: int, ids_usuario:str, modificacion: str, latitud : float , longitud: float, origen:str):
+    try:
+        conexion = psycopg2.connect(**parametros_conexion)
+        cursor = conexion.cursor()
+        consulta = f"INSERT INTO mercadolibre.bitacora_general(id_usuario,ids_usuario, modificacion, latitud, longitud, origen)VALUES('{id_usuario}', '{ids_usuario}', '{modificacion}', '{latitud}', '{longitud}', '{origen}');"
+        cursor.execute(consulta)
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        print()
+        return {"message": "Datos Ingresados Correctamente"}
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/infoAMB")
+async def Obtener_datos( op: int, cop: int,id_ppu: int, fecha: str):
+     # Consulta SQL para obtener datos (por ejemplo)
+    consulta = f"select * from mercadolibre.retorno_ambulancia('{fecha}',{op},{cop},{id_ppu});"
+    # Ejecutar la consulta utilizando nuestra función
+    datos = ejecutar_consulta(consulta)
+    # Verificar si hay datos 
+    if datos:
+        datos_formateados = [{
+                                "id_ppu": fila [0],
+                                "ppu": fila[1],
+                                "ruta_meli": fila[2],
+
+                            } 
+                            for fila in datos]
+        return datos_formateados
+    else:
+        raise HTTPException(status_code=404, detail="No se encontraron datos")
 
 if __name__ == "__main__":
  uvicorn.run(app, host="0.0.0.0", port=8000)
