@@ -151,21 +151,21 @@ async def Obtener_datos():
 @app.get("/api/getInfoTable")
 async def Obtener_datos():
      # Consulta SQL para obtener datos (por ejemplo)
-    consulta = f"""select id,operacion, centro_operacion, tipo_vehiculo, capacidad, periodicidad, tarifa, fecha_de_caducidad from finanzas.tarifario_general tg"""
+    consulta = f"""select * from finanzas.listar_tarifario_general();"""
     # Ejecutar la consulta utilizando nuestra función
     datos = ejecutar_consulta(consulta)
     # Verificar si hay datos
     if datos:
         datos_formateados = [{  
                                 "id": fila [0],
-                                "operacion" : fila[1],
-                                "centro_operacion": fila[2],
-                                "tipo_vehiculo":fila[3],
-                                "capacidad":fila[4],
-                                "periodicidad":fila[5],
+                                "nombre" : fila[1],
+                                "centro": fila[2],
+                                "tipo":fila[3],
+                                "caracteristica_tarifa":fila[4],
+                                "periodo":fila[5],
                                 "tarifa":fila[6],
                                 "fecha_de_caducidad":fila[7]
-                                
+                                        
 
                             } 
                             for fila in datos]
