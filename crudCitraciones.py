@@ -152,12 +152,12 @@ def ejecutar_delete(sql):
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.delete("/api/borrar")
-async def eliminar_modalidad(id_ppu: str):
+async def eliminar_modalidad(id: str):
     # Construir la sentencia SQL de eliminación
-    sql = f"DELETE FROM mercadolibre.citacion WHERE id_ppu ='{id_ppu}';"
+    sql = f"DELETE FROM mercadolibre.citacion WHERE id ='{id}';"
     # Llamar a la función para ejecutar la sentencia SQL de eliminación
     ejecutar_delete(sql)
-    return {"message": f"Entrada con ID {id_ppu} eliminada correctamente"}
+    return {"message": f"Entrada con ID {id} eliminada correctamente"}
 
 
 @app.get("/api/estadoList")
@@ -229,15 +229,16 @@ async def Obtener_datos(fecha: str, op : int, cop : int):
     # Verificar si hay datos 
     if datos:
         datos_formateados = [{
-                                "id_ppu": fila [0],
-                                "ppu": fila[1],
-                                "ruta_meli": fila[2],
-                                "tipo_ruta":fila[3],
-                                "estado": fila [4],
-                                "id_driver":fila[5],
-                                "nombre_driver": fila[6],
-                                "id_peoneta": fila [7],
-                                "nombre_peoneta":fila[8]
+                                "id": fila[0],
+                                "id_ppu": fila [1],
+                                "ppu": fila[2],
+                                "ruta_meli": fila[3],
+                                "tipo_ruta":fila[4],
+                                "estado": fila [5],
+                                "id_driver":fila[6],
+                                "nombre_driver": fila[7],
+                                "id_peoneta": fila [8],
+                                "nombre_peoneta":fila[9]
 
 
                             } 
@@ -264,11 +265,11 @@ async def agregarPatente(body: agregarPatente):
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/api/actualizar_estadoPpu")
-async def actualizar_estado(estado: int, id_ppu : int, fecha:str):
+async def actualizar_estado(estado: int, id : int, fecha:str):
     try:
         conexion = psycopg2.connect(**parametros_conexion)
         cursor = conexion.cursor()
-        consulta = f"UPDATE mercadolibre.citacion SET estado={estado} WHERE fecha='{fecha}' AND id_ppu={id_ppu}"
+        consulta = f"UPDATE mercadolibre.citacion SET estado={estado} WHERE fecha='{fecha}' AND id='{id}'"
         cursor.execute(consulta)
         conexion.commit()
         cursor.close()
@@ -297,11 +298,11 @@ async def Obtener_datos(id_estado: int):
 
 @app.post("/api/actualizar_rutaMeli")
 
-async def actualizar_estado(ruta_meli: int, id_ppu : int, fecha: str):
+async def actualizar_estado(ruta_meli: int, id : int, fecha: str):
     try:
         conexion = psycopg2.connect(**parametros_conexion)
         cursor = conexion.cursor()
-        consulta = f"UPDATE mercadolibre.citacion SET ruta_meli ={ruta_meli} WHERE id_ppu={id_ppu} and fecha='{fecha}'"
+        consulta = f"UPDATE mercadolibre.citacion SET ruta_meli ={ruta_meli} WHERE id={id} and fecha='{fecha}'"
         cursor.execute(consulta)
         conexion.commit()
         cursor.close()
@@ -412,11 +413,11 @@ async def Obtener_datos():
     
 @app.post("/api/actualizar_tipoRuta")
 
-async def actualizar_estado(tipo_ruta: int, id_ppu : int, fecha: str):
+async def actualizar_estado(tipo_ruta: int, id : int, fecha: str):
     try:
         conexion = psycopg2.connect(**parametros_conexion)
         cursor = conexion.cursor()
-        consulta = f"UPDATE mercadolibre.citacion SET tipo_ruta ={tipo_ruta} WHERE id_ppu={id_ppu} and fecha='{fecha}'"
+        consulta = f"UPDATE mercadolibre.citacion SET tipo_ruta ={tipo_ruta} WHERE id={id} and fecha='{fecha}'"
         cursor.execute(consulta)
         conexion.commit()
         cursor.close()
