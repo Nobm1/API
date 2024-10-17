@@ -3,15 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from pydantic import BaseModel
 import uvicorn
+from dotenv import load_dotenv
+import os
 
 app = FastAPI()
 # Parámetros de conexión a la base de datos
 parametros_conexion = {
-    "host": "44.199.104.254",
-    "database": "postgres",
-    "user": "wms_readonly",
-    "password": "TY2022#",
-    "port" : "5432"
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT")
 }
 origins = ["*"]
 app.add_middleware(
